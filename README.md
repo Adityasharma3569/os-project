@@ -16,3 +16,18 @@ th,td{padding:6px;border-bottom:1px solid #eee;font-size:14px}
 </style>
 </head>
 <body>
+
+<h2>Real-Time Multithreaded Application Simulator</h2>
+
+<div class="panel">
+<select id="scheduler">
+<option value="fcfs">FCFS</option>
+<option value="priority">Priority</option>
+<option value="rr">Round Robin</option>
+</select>
+<input id="quantum" type="number" value="1000" style="display:none;width:120px">
+<button class="start" id="startBtn">Start</button>
+<button id="pauseBtn">Pause</button>
+<button id="resetBtn">Reset</button>
+</div>
+

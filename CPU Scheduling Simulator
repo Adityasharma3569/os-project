@@ -1,0 +1,33 @@
+document.getElementById('scheduler').onchange=function(){
+document.getElementById('quantum').style.display=this.value=="rr"?"inline-block":"none";
+};
+document.getElementById('addThread').onclick=()=>{
+let b=parseInt(burst.value),a=parseInt(arrival.value),p=parseInt(priorityT.value);
+let id=threads.length+1;
+threads.push({id,burst:b,rem:b,arr:a,pri:p,state:a==0?"ready":"new",st:null,en:null,wait:0});
+render();show("T"+id+" added");
+};
+function pick(){
+let r=threads.map((t,i)=>({t,i})).filter(x=>x.t.rem>0&&x.t.arr<=clock);
+if(!r.length)return null;
+let s=scheduler.value;
+if(s=="fcfs")r.sort((a,b)=>(a.t.arr-b.t.arr)||(a.t.id-b.t.id));
+else if(s=="priority")r.sort((a,b)=>(a.t.pri-b.t.pri));
+else{
+ready=ready.filter(i=>threads[i].rem>0&&threads[i].arr<=clock);
+r.forEach(x=>{if(!ready.includes(x.i))ready.push(x.i)});
+if(cpu&&threads[cpu.id].rem>0)return cpu.id;
+return ready.length?ready[0]:null;
+}
+return r[0].i;
+}
+function start(){
+if(loop)return;
+loop=setInterval(tick,T);
+show("Simulation started");
+}
+function pause(){clearInterval(loop);loop=null;show("Paused")}
+function reset(){
+pause();clock=0;threads=[];cpu=null;done=0;ready=[];
+log.innerHTML="";tick.innerHTML=0;cpu.innerHTML="idle";done.innerHTML=0;stats.innerHTML="Add threads.";render();
+}

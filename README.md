@@ -65,3 +65,12 @@ threads.forEach(x=>{
 tb.innerHTML+=`<tr><td>T${x.id}</td><td>${x.burst}</td><td>${x.rem}</td><td>${x.arr}</td><td>${x.pri}</td><td>${x.state}</td></tr>`;
 });
 }
+document.getElementById('scheduler').onchange=function(){
+document.getElementById('quantum').style.display=this.value=="rr"?"inline-block":"none";
+};
+document.getElementById('addThread').onclick=()=>{
+let b=parseInt(burst.value),a=parseInt(arrival.value),p=parseInt(priorityT.value);
+let id=threads.length+1;
+threads.push({id,burst:b,rem:b,arr:a,pri:p,state:a==0?"ready":"new",st:null,en:null,wait:0});
+render();show("T"+id+" added");
+};

@@ -68,3 +68,27 @@
     threads.forEach(t => {
       if (t.state === 'new') t.state = 'ready';
     });
+    
+    let runnable = threads.filter(t => t.state === 'ready');
+
+    if (model === 'many-one' && runnable.length > 0) {
+      runnable[0].state = 'running';
+      log('Many-to-One: Thread T' + runnable[0].id + ' is RUNNING');
+    }
+
+    if (model === 'one-many') {
+      runnable.forEach(t => {
+        t.state = 'running';
+        log('One-to-Many: Thread T' + t.id + ' is RUNNING on kernel thread');
+      });
+    }
+
+    if (model === 'many-many') {
+      runnable.slice(0,2).forEach(t => {
+        t.state = 'running';
+        log('Many-to-Many: Thread T' + t.id + ' mapped to kernel thread');
+      });
+    }
+
+    render();
+  }

@@ -1,76 +1,70 @@
-<!doctype html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Real-Time Multithreaded Simulator</title>
-<style>
-body{font-family:Arial;margin:20px;background:#f2f2f7}
-.panel{background:#fff;padding:12px;border-radius:8px;margin-top:12px;box-shadow:0 0 10px #ccc}
-input,select{padding:6px;border:1px solid #ccc;border-radius:6px}
-button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer}
-button.start{background:#2563eb;color:#fff}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:6px;border-bottom:1px solid #eee;font-size:14px}
-.log{background:#111;color:#9ae6ff;height:150px;overflow:auto;padding:8px;font-family:monospace;font-size:13px;border-radius:6px}
-.chip{background:#eef1ff;padding:6px 10px;border-radius:20px;margin-right:8px;font-size:13px;display:inline-block}
-</style>
+  <meta charset="UTF-8" />
+  <title>Real-Time Multithreading Simulator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+    h1 { text-align:center; }
+    .container { max-width:1000px; margin:auto; }
+    .controls, .panel { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    button { padding:8px 14px; margin:5px; cursor:pointer; }
+    select { padding:6px; }
+    .threads { display:flex; flex-wrap:wrap; gap:10px; }
+    .thread { width:120px; padding:10px; border-radius:6px; text-align:center; color:#fff; }
+    .new { background:#6c757d; }
+    .ready { background:#0d6efd; }
+    .running { background:#198754; }
+    .blocked { background:#dc3545; }
+    .terminated { background:#212529; }
+    .log { height:150px; overflow:auto; background:#000; color:#0f0; padding:10px; font-size:13px; }
+  </style>
 </head>
 <body>
-
-<h2>Real-Time Multithreaded Application Simulator</h2>
-
-<div class="panel">
-<select id="scheduler">
-<option value="fcfs">FCFS</option>
-<option value="priority">Priority</option>
-<option value="rr">Round Robin</option>
-</select>
-<input id="quantum" type="number" value="1000" style="display:none;width:120px">
-<button class="start" id="startBtn">Start</button>
-<button id="pauseBtn">Pause</button>
-<button id="resetBtn">Reset</button>
-</div>
-<div class="panel">
-<h4>Add Thread</h4>
-<input id="burst" type="number" placeholder="Burst (ms)" value="3000">
-<input id="arrival" type="number" placeholder="Arrival (ms)" value="0">
-<input id="priorityT" type="number" placeholder="Priority" value="1">
-<button id="addThread">Add</button>
-
-<table>
-<thead><tr><th>ID</th><th>Burst</th><th>Remain</th><th>Arrival</th><th>Priority</th><th>State</th></tr></thead>
-<tbody id="tbody"></tbody>
-</table>
+  <div class="container">
+    <h1>Real-Time Multi-threaded Application Simulator</h1><div class="controls">
+  <label>Threading Model: </label>
+  <select id="model">
+    <option value="many-one">Many-to-One</option>
+    <option value="one-many">One-to-Many</option>
+    <option value="many-many">Many-to-Many</option>
+  </select>
+  <button onclick="createThread()">Create Thread</button>
+  <button onclick="runScheduler()">Run Scheduler</button>
+  <button onclick="semaphoreWait()">Semaphore Wait</button>
+  <button onclick="semaphoreSignal()">Semaphore Signal</button>
+  <button onclick="resetSim()">Reset</button>
 </div>
 
 <div class="panel">
-<h4>Log</h4>
-<div id="log" class="log"></div>
-<div class="chip">Tick: <span id="tick">0</span></div>
-<div class="chip">CPU: <span id="cpu">idle</span></div>
-<div class="chip">Done: <span id="done">0</span></div>
+  <h3>Threads</h3>
+  <div class="threads" id="threadArea"></div>
 </div>
 
 <div class="panel">
-<h4>Stats</h4>
-<div id="stats">Add threads and start simulation.</div>
+  <h3>System Log</h3>
+  <div class="log" id="log"></div>
 </div>
 
-<script>
-let T=200,clock=0,threads=[],cpu=null,done=0,ready=[],loop=null;
-function show(t){document.getElementById('log').innerHTML+=t+"\n"}
-function render(){
-let tb=document.getElementById('tbody');tb.innerHTML="";
-threads.forEach(x=>{
-tb.innerHTML+=`<tr><td>T${x.id}</td><td>${x.burst}</td><td>${x.rem}</td><td>${x.arr}</td><td>${x.pri}</td><td>${x.state}</td></tr>`;
-});
-}
-document.getElementById('scheduler').onchange=function(){
-document.getElementById('quantum').style.display=this.value=="rr"?"inline-block":"none";
-};
-document.getElementById('addThread').onclick=()=>{
-let b=parseInt(burst.value),a=parseInt(arrival.value),p=parseInt(priorityT.value);
-let id=threads.length+1;
-threads.push({id,burst:b,rem:b,arr:a,pri:p,state:a==0?"ready":"new",st:null,en:null,wait:0});
-render();show("T"+id+" added");
-};
+  </div><script>
+  let threads = [];
+  let threadId = 1;
+  let semaphore = 1;
+
+  function log(msg) {
+    const logBox = document.getElementById('log');
+    logBox.innerHTML += msg + '<br>';
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function createThread() {
+    const t = { id: threadId++, state: 'new' };
+    threads.push(t);
+    log('Thread T' + t.id + ' created (NEW)');
+    render();
+  }
+
+  function runScheduler() {
+    const model = document.getElementById('model').value;
+    threads.forEach(t => {
+      if (t.state === 'new') t.state = 'ready';
+    });

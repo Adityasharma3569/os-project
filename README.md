@@ -92,3 +92,37 @@
 
     render();
   }
+
+  function semaphoreWait() {
+    if (semaphore > 0) {
+      semaphore--;
+      log('Semaphore acquired');
+    } else {
+      let running = threads.find(t => t.state === 'running');
+      if (running) {
+        running.state = 'blocked';
+        log('Thread T' + running.id + ' BLOCKED (Semaphore wait)');
+      }
+    }
+    render();
+  }
+
+  function semaphoreSignal() {
+    semaphore++;
+    let blocked = threads.find(t => t.state === 'blocked');
+    if (blocked) {
+      blocked.state = 'ready';
+      log('Thread T' + blocked.id + ' moved to READY (Semaphore signal)');
+    } else {
+      log('Semaphore released');
+    }
+    render();
+  }
+
+  function resetSim() {
+    threads = [];
+    threadId = 1;
+    semaphore = 1;
+    document.getElementById('log').innerHTML = '';
+    render();
+  }

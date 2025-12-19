@@ -126,3 +126,15 @@
     document.getElementById('log').innerHTML = '';
     render();
   }
+    function render() {
+    const area = document.getElementById('threadArea');
+    area.innerHTML = '';
+    threads.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'thread ' + t.state;
+      div.innerHTML = 'T' + t.id + '<br>' + t.state.toUpperCase();
+      area.appendChild(div);
+    });
+  }
+</script></body>
+</html>
